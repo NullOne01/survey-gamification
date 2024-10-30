@@ -1,8 +1,8 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Provider } from 'react-redux';
-import { store } from './store';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
+import { store } from './store';
 
 // Common components
 import PrivateRoute from './components/common/PrivateRoute';
@@ -16,9 +16,9 @@ import ResetPassword from './components/auth/ResetPassword';
 // Main components
 import ProfileInfo from './components/profile/ProfileInfo';
 import CreateSurvey from './components/survey/CreateSurvey';
-import SurveyInfo from './components/survey/SurveyInfo';
 import TakeSurvey from './components/survey/TakeSurvey';
 import YourSurveys from './components/survey/YourSurveys';
+import SurveyInfo from './components/survey/SurveyInfo';
 
 const darkTheme = createTheme({
   palette: {
@@ -49,7 +49,7 @@ function App() {
             <Route path="/create-survey" element={<CreateSurvey />} />
             <Route path="/take-survey/:surveyId" element={<TakeSurvey />} />
 
-            {/* Protected routes - will redirect to login if not authenticated */}
+            {/* Protected routes */}
             <Route element={<PrivateRoute />}>
               <Route path="/profile" element={<ProfileInfo />} />
               <Route path="/your-surveys" element={<YourSurveys />} />

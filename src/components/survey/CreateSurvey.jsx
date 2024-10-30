@@ -11,6 +11,7 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  Alert,
 } from '@mui/material';
 import Navigation from '../common/Navigation';
 
@@ -19,6 +20,12 @@ function CreateSurvey() {
   const isAuthenticated = useSelector(state => state.auth.isAuthenticated);
   const [googleFormUrl, setGoogleFormUrl] = useState('');
   const [showAuthDialog, setShowAuthDialog] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
+
+  const validateUrl = (url) => {
+    return url.startsWith('https://docs.google.com/forms/');
+  };
 
   const handleSubmit = async () => {
     if (!isAuthenticated) {
@@ -26,20 +33,45 @@ function CreateSurvey() {
       return;
     }
 
+    if (!googleFormUrl) {
+      setError('Please enter a Google Form URL');
+      return;
+    }
+
+    if (!validateUrl(googleFormUrl)) {
+      setError('Please enter a valid Google Form URL');
+      return;
+    }
+
     try {
+      setIsSubmitting(true);
+      setError('');
+      
       // Mock API call
       await new Promise(resolve => setTimeout(resolve, 1000));
-      navigate('/survey-info/new-survey');
-    } catch (error) {
-      console.error('Failed to create survey:', error);
+      
+      // Mock survey ID
+      const newSurveyId = 'survey-' + Date.now();
+      
+      // Redirect to take survey page
+      navigate(`/take-survey/${newSurveyId}`);
+    } catch (err) {
+      setError('Failed to create survey. Please try again.');
+      console.error('Failed to create survey:', err);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <Box sx={{ flexGrow: 1, height: '100vh', bgcolor: '#1a1a1a' }}>
+    <Box sx={{ 
+      minHeight: '100vh',
+      bgcolor: '#1a1a1a',
+      display: 'flex',
+      flexDirection: 'column'
+    }}>
       <Navigation />
 
-      {/* Main Content */}
       <Container maxWidth="md">
         <Box
           sx={{
@@ -51,7 +83,7 @@ function CreateSurvey() {
           }}
         >
           <Typography
-            color="primary"
+            variant="h6"
             sx={{
               color: '#4a90e2',
               mb: 2
@@ -59,6 +91,17 @@ function CreateSurvey() {
           >
             Your google form link:
           </Typography>
+
+          {error && (
+            <Alert 
+              severity="error" 
+              sx={{ width: '100%', mb: 2 }}
+              onClose={() => setError('')}
+            >
+              {error}
+            </Alert>
+          )}
+
           <TextField
             fullWidth
             value={googleFormUrl}
@@ -82,27 +125,39 @@ function CreateSurvey() {
               borderRadius: 1,
             }}
             placeholder="https://docs.google.com/forms/d/e/..."
+            disabled={isSubmitting}
+            error={!!error}
+            helperText={error}
           />
+
           <Button
             variant="contained"
             onClick={handleSubmit}
+            disabled={isSubmitting}
             sx={{
               mt: 2,
               bgcolor: '#4a4a4a',
               '&:hover': {
                 bgcolor: '#5a5a5a'
               },
+              minWidth: 200,
+              py: 1.5
             }}
           >
-            Create your survey
+            {isSubmitting ? 'Creating...' : 'Create your survey'}
           </Button>
         </Box>
       </Container>
 
-      {/* Authentication Dialog */}
       <Dialog
         open={showAuthDialog}
         onClose={() => setShowAuthDialog(false)}
+        PaperProps={{
+          sx: {
+            bgcolor: 'white',
+            color: 'black'
+          }
+        }}
       >
         <DialogTitle>Authentication Required</DialogTitle>
         <DialogContent>
@@ -111,10 +166,15 @@ function CreateSurvey() {
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setShowAuthDialog(false)}>Cancel</Button>
+          <Button 
+            onClick={() => setShowAuthDialog(false)}
+            sx={{ color: 'black' }}
+          >
+            Cancel
+          </Button>
           <Button 
             onClick={() => navigate('/register')} 
-            variant="contained" 
+            variant="contained"
             color="primary"
           >
             Register
@@ -122,6 +182,7 @@ function CreateSurvey() {
           <Button 
             onClick={() => navigate('/login')}
             variant="contained"
+            sx={{ bgcolor: 'black' }}
           >
             Sign In
           </Button>
@@ -131,4 +192,4 @@ function CreateSurvey() {
   );
 }
 
-export default CreateSurvey; 
+export default CreateSurvey;
